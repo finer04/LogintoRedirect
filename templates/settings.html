@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="CN">
+<head>
+    <meta charset="UTF-8">
+    <title>设置 - {{data.title}}</title>
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+     <link href="/static/css/app.css" rel="stylesheet">
+    <script src="/static/js/jquery.min.js"></script>
+    <script src="/static/js/app.js"></script>
+    <script src="/static/js/qrcode.min.js"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
+    <script src="/static/js/bootstrap.bundle.min.js"></script>
+
+</head>
+<body style=" background:#f4f6fa;">
+<div class="container-fluid">
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-light bg-white">
+			<div class="container-fluid">
+				 <span class="px-2 fs-3"> {{data.title}} </span>
+				<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+					<span class="navbar-toggler-icon"></span>
+				</button>
+				<div class="collapse navbar-collapse px-2" id="navbarSupportedContent">
+					<ul class="navbar-nav me-auto mb-1 mb-lg-0">
+
+						<li class="nav-item">
+							<a class="nav-link" href="/dest">重新加载</a>
+						</li>
+
+                        {% if character != 'user' %}
+						<li class="nav-item">
+							<a class="nav-link" href="/settings"><strong>全局设置</strong></a>
+						</li>
+                        {% endif %}
+
+
+					</ul>
+
+					<span class="navbar-text d-flex justify-content-end">
+						<ul class="nav nav-pills">
+				<li class="nav-item dropdown">
+				    <a class="nav-link dropdown-toggle text-muted" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false"><span class="nav-person p-1">
+                        {{data.username}} <span class="badge bg-secondary">{{data.CNcharacter}}</span>
+
+							<span class="nav-person-name text-muted"> </span>
+						</span></a>
+				    <ul class="dropdown-menu">
+				      <li><a class="dropdown-item" href="#" onclick="logout();">登出</a></li>
+				    </ul>
+				  </li>
+				</ul>
+
+      				</span>
+
+				</div>
+			</div>
+</nav>
+
+<div class="container">
+    <div class="row align-items-center py-3" >
+              <div class="col" style="padding-bottom:15px;">
+                <!-- Page pre-title -->
+                <div class="page-pretitle">
+                  设置
+                </div>
+                <h2 class="page-title">
+                  全局设置
+                </h2>
+              </div>
+
+            <div class="card p-0">
+                <div class="card-header">
+                <h3 class="card-title">用户管理</h3>
+                </div>
+                <div class="card-body m-2 py-3">
+             <table class="table table-borderless bg-white table-responsive card-table text-nowrap fs-6 lead " id="userlist">
+              <thead>
+                <tr>
+                    <th scope="col">ID</th>
+                  <th scope="col">用户名</th>
+                 <th scope="col">角色</th>
+                    <th scope="col">动态口令状态</th>
+                  <th scope="col">OTP 识别码</th>
+                  <th scope="col">状态</th>
+                    <th scope="col">操作</th>
+                </tr>
+              </thead>
+                 <tbody>
+                <tr>
+
+                </tr>
+              </tbody>
+            </table>
+
+
+        </div>
+
+        <div class="card-footer border-0 text-muted text-end">
+             <a href="#" class=" btn btn-primary ">新增用户</a>
+        </div>
+
+            </div>
+
+
+          <div class="card my-5 p-0">
+                <div class="card-header">
+                <h3 class="card-title">高级设置</h3>
+                </div>
+                <div class="card-body m-2 py-3">
+                    <form id="all_settings">
+                        <div class="mb-3">
+                            <label for="title" class="form-label">系统名称</label>
+                            <input type="text" class="form-control" id="title" value="{{data.title}}">
+                            <div class="form-text">你需要跳转系统的真实名称，系统名称将显示在网页的标题处。</div>
+                            </div>
+                        <div class="mb-3">
+                            <label for="title" class="form-label">系统真实 URL</label>
+                            <input type="text" class="form-control" id="dest_url" value="{{data.url}}">
+                            <div class="form-text">你需要跳转系统的真实 URL，登录成功后将会跳转到该 URL。</div>
+                            </div>
+                            <div class="mb-3">
+                            <label for="white_IP_list" class="form-label">可访问的 IP 列表</label>
+                            <textarea class="form-control" id="white_IP_list" rows="3" >{{data.white_ip}}</textarea>
+                             <div class="form-text">用逗号(,)隔开，登录系统只允许这些 IP 才可以正常登录系统。</div>
+                        </div>
+
+                        <div class="row g-2">
+                        <div class="col-md">
+                        <div class="form-floating">
+                        <input type="text" class="form-control" id="set_login_failure_time" value="{{data.login_f}}">
+                        <label for="set_login_failure_time">登录次数限制</label>
+                            <div class="form-text">单位次数，连续登录错误多少次将锁定账号。</div>
+                        </div>
+                        </div>
+                        <div class="col-md">
+                        <div class="form-floating">
+                        <input type="text" class="form-control" id="set_login_lock_time" value="{{data.login_l}}">
+                        <label for="set_login_lock_time">锁定时长</label>
+                            <div class="form-text">单位分钟，因登录错误导致锁定账号的时长。</div>
+                        </div>
+                        </div>
+                        <div class="col-md">
+                    <div class="form-floating">
+                    <input type="text" class="form-control" id="session_long" value="{{data.session_long}}">
+                    <label for="session_long">Session 过期时间</label>
+                        <div class="form-text">单位分钟，如果长时间未有活动将自动登出。</div>
+                    </div>
+                    </div>
+                    <div class="col-md">
+                    <div class="form-floating">
+                    <input type="text" class="form-control" value="90" disabled>
+                    <label for="password_expired">密码有效期</label>
+                        <div class="form-text">天，超过指定时长将要求重置新密码。</div>
+                    </div>
+                    </div>
+                        </div>
+
+                    </form>
+
+        </div>
+
+        <div class="card-footer border-0 text-muted text-end">
+             <a href="#" class=" btn btn-primary" onclick="setting_submit();">保存设置</a>
+        </div>
+
+            </div>
+
+            </div>
+
+</div>
+
+</div>
+</body>
+</html>

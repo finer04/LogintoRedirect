@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="CN">
+<head>
+    <meta charset="UTF-8">
+    <title>Login - {{title}}</title>
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+     <link href="/static/css/app.css" rel="stylesheet">
+    <script src="/static/js/jquery.min.js"></script>
+    <script src="/static/js/app.js"></script>
+    <script src="/static/js/bootstrap.bundle.min.js"></script>
+
+</head>
+<body style="overflow: hidden;animation: bg-xuanzhuan 40s ease-in-out infinite alternate;background-size: 150%;">
+<div class="container">
+    <div class="row align-items-center " style="height: 100vh;">
+        <div class="box row border-0 p-0 rounded bg-light shadow" >
+            <div class="col px-0 rounded-start" id="login_feature_image"></div>
+            <div class="col-4 m-2 p-3 " id="login-form">
+                <div class="col py-4">
+                <h2 class=" fw-light">🍵 远方来客，静候佳音...</h2>
+                <span class="my-2 text-muted ">—— 您即将进入 <strong>{{title}}</strong> 。</span>
+                    </div>
+
+                <div class="alert" id="alert" role="alert" style="display:none;">
+                    Error
+                    </div>
+
+        <form class="px-1 login-form" method="post">
+            <div class="form-floating mb-3">
+                <input class="form-control shadow-sm up" type="text" id="username" name="username" required placeholder="username">
+                <label  for="username">用户名</label>
+
+            </div>
+            <div class="form-floating mb-3">
+                <input class="form-control shadow-sm up" type="password" id="password" name="password" required placeholder="password">
+                <label  for="floatingInput">密码</label>
+            </div>
+              <div class="row g-1">
+                  <div class="col-7">
+                <div class="form-floating mb-2">
+                    <input class="form-control shadow-sm w-100" type="text" id="captcha" name="captcha" required placeholder="captcha">
+                    <label for="floatingInput">验证码</label>
+                    <div class="form-text">区分大小写，点击图片刷新</div>
+                </div></div>
+                  <div class="captcha-image col m-1" style="text-align: center;">
+                      <img src="/code"  id="valid-img" class="rounded-pill" style="margin: 3px;">
+                  </div>
+
+                  </div>
+            <div>
+
+            </div>
+            <div class="row g-2">
+                <div class="col-md-4">
+                    <div class="form-floating">
+                    <select class="form-select shadow-sm" id="two-factor" aria-label="" >
+                      <option value="1" selected>无</option>
+                      <option value="2">OTP 认证</option>
+                    </select>
+                    <label for="floatingSelectGrid">二步认证</label>
+                    </div>
+                    </div>
+                <div class="col" id="OTP-windows" style="display:none;">
+                    <div class="form-floating">
+                    <input type="text" class="form-control shadow-sm" id="OTP-id"  placeholder="OTP-id">
+                    <label for="otpid">动态口令</label>
+                    </div>
+                </div>
+                <div id="Help" class="form-text">如果账号有开启二步认证的话，请选择 OTP 认证并填写对应的动态口令。</div>
+
+                </div>
+
+            <div class="row my-4 px-3" >
+                <button type="submit" class="btn btn-primary btn-lg shadow"  id="loginbutton" onclick="login();">提交</button>
+            </div>
+
+        </form>
+            </div>
+</div>
+
+    </div>
+</div>
+
+</body>
+</html>
