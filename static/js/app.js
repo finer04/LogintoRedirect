@@ -320,7 +320,7 @@ function addhtml(username){
         操作
         </button>
         <ul class="dropdown-menu" aria-labelledby="dropdownMenu">
-        <li><a class="dropdown-item" href="#" onclick="userops('${username}',')">修改密码</a></li>
+        <li><a class="dropdown-item" href="#" onclick="userops('${username}','c')">修改密码</a></li>
         <li><a class="dropdown-item" href="#" onclick="userops('${username}','l')">锁定/解锁账号</a></li>
         <li><a class="dropdown-item" href="#" onclick="userops('${username}','o')">开启/关闭动态口令</a></li>
         <li><a class="dropdown-item" href="#" onclick="userops('${username}','d');">删除该用户</a></li>
@@ -358,6 +358,9 @@ function userops(name,way) {
             break;
         case "o":
             u.OTP();
+            break;
+        case 'c':
+            u.change_password();
             break;
     }
 }
@@ -430,6 +433,35 @@ class User_Ops {
     }
     }
 
+    change_password(){
+        var old_password = prompt("请输入该账号的原来的密码","");
+        var new_password = prompt("请输入新的密码，密码必须含大写、小写、特殊符号与数字，且密码不少于 8 位字符！","");
+
+        var data = {
+            'old_password': old_password,
+            'new_password': new_password,
+            'username' : this.name
+        }
+
+        $.ajax({
+                //提交数据的类型 POST GET
+                type:"PUT",
+                //提交的网址
+                url: "/user/modify/password",
+                //提交的数据
+                data: data,
+                datatype: "text",
+                //成功返回之后调用的函数
+                success:function(data){
+                        alert(data);
+                } ,
+                //调用出错执行的函数
+                error: function(){
+                    alert("网络错误");
+                    window.location.reload();
+                }
+             });
+    }
 }
 
 

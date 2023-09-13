@@ -265,9 +265,12 @@ def modify_user_password():
         user = User.query.filter_by(username=form['username']).first()
         if form['old_password'] == user.password: # 验证旧密码是否跟原来的密码一样
             if form['new_password'] != user.password: # 验证新密码是否跟旧密码是否不一致，一致的话不行
-                user.password = form['new_password']
-                db.session.commit()
-                return 'success'
+                if utils.check_password_complexity(form['new_password']):
+                    user.password = form['new_password']
+                    db.session.commit()
+                    return '已修改成功！'
+                else:
+                    return '密码不符合密码复杂度'
             else:
                 return '新密码不能跟旧密码相同'
         else:
