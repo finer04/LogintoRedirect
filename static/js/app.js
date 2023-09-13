@@ -1,4 +1,6 @@
 var url = window.location.pathname;
+const areStringsEqual = (a, b) => a === b; //判断字符串是否一致
+const isStringLengthExceeded = str => str.length > 8; //判断字符串时候大于8
 
 $(function(){
 
@@ -428,4 +430,71 @@ class User_Ops {
     }
     }
 
+}
+
+
+function setup(){
+    let data = {};
+    let value1 = $('#all_settings').serializeArray();
+    let value2 = $('#adduser').serializeArray();
+    let merge = value1.concat(value2);
+    $.each(merge, function (index, item) {
+                data[item.name] = item.value;
+            });
+
+
+    let s = $('#setup-area');
+
+    $.ajax({
+                //提交数据的类型 POST GET
+                type:"POST",
+                //提交的网址
+                url: "/setup",
+                //提交的数据
+                data: data,
+                datatype: "text",
+                //成功返回之后调用的函数
+                success:function(data){
+                    if (data.includes("success")) {
+                        setTimeout(function() {s.find('p:eq(1)').show(); setTimeout(function() {s.find('p:eq(2)').show(); s.find('a').show();} , 3000);} , 3000);
+                    }
+                } ,
+                //调用出错执行的函数
+                error: function(){
+                    alert("网络错误");
+                    window.location.reload();
+                }
+             });
+
+}
+
+function pagechange(num) {
+    if (num == 1) {
+        $('#page1').hide();
+        $('#page2').show();
+    } else if (num == 2) {
+
+    var password_entire = $('#password_again').val();
+    var password = $('#add_password').val();
+
+
+    //验证表单时候填完
+    var formValid = true;
+        $("input").each(function() {
+          if ($(this).val() === "") {
+            alert("请填写所有必填字段！");
+            formValid = false;
+            return false; // 停止遍历
+          }
+        });
+        if (!formValid) {
+          event.preventDefault(); // 阻止表单提交
+        } else if (formValid && areStringsEqual(password_entire,password)) {
+            $('#page2').hide();
+            $('#page3').show();
+            setup();
+        } else {
+            alert('密码不一致')
+        }
+    }
 }

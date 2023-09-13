@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="cn">
+<head>
+    <meta charset="UTF-8">
+    <title>部署 LoginToRedirect</title>
+     <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+     <link href="/static/css/app.css" rel="stylesheet">
+    <script src="/static/js/jquery.min.js"></script>
+    <script src="/static/js/app.js"></script>
+    <script src="/static/js/bootstrap.bundle.min.js"></script>
+</head>
+<body style="background-image: linear-gradient(to top, #e6e9f0 0%, #eef1f5 100%);">
+    <div class="container shadow bg-white">
+        <div class="row py-5" id="page1" style="height:100vh;">
+            <div class="col text-center">
+                <h2>欢迎使用 LoginToRedirect 系统</h2>
+                <p>请阅读《使用规约》，同意《使用规约》方可继续部署</p>
+            </div>
+
+
+            <div class="row p-3">
+            <div class="col d-flex justify-content-center" id="readme">
+                <div class="form-floating col-9" >
+                  <textarea class="form-control lead text-center" placeholder="readme" id="read" readonly style="height: 60vh;">
+
+一、引言
+
+本软件是一个供用户学习、自用或参与开发的开源项目。在使用本软件之前，请您仔细阅读以下使用规约，并同意其中的条款。使用本软件即代表您已同意以下条款：
+
+二、责任与义务
+
+1. 本系统仅供学习、自用或参与开发的目的，请您合法合规地使用本软件，并自行承担使用本软件所产生的风险和责任。本软件不为您的行为提供担保或背书，您应对自己的行为负责。
+2. 本系统为开源项目，您可以在遵守相关法律法规和本使用规约的前提下，自由地使用、复制、分发、传播、研究、改进或以其他方式使用本软件，但不得直接盗用或自称是自己做的。
+3. 本系统全程不连接外网，也不涉及任何外部网络数据交换。因此，您在使用本软件时，应自行承担与使用外网相关的风险和责任。
+4. 本系统已基本符合当前的等级保护要求。但是，若未来等级保护要求发生变更，本系统可能无法保证完全符合新的要求。在此情况下，请您在使用本软件时，及时了解相关法律法规的最新要求，并自行评估风险。
+
+三、技术支持与疑问解答
+
+1. 本系统由 Finer04 开发，如果您在使用过程中遇到任何问题或疑问，请在github上以issue的形式提出。我们将尽快回复并提供相应的帮助。
+2. 我们鼓励您在使用过程中提供宝贵的建议和反馈，帮助我们不断改进和完善本系统。您可以通过github上的issue或其它联系方式与我们联系，我们将非常感谢您提供的意见和建议。
+
+四、其他条款
+
+1. 本使用规约的修改和解释权归 Finer04 所有。若您发现任何违反本使用规约的行为，请及时与我们联系。我们将根据实际情况采取相应的措施。
+2. 本使用规约自您同意之日起生效，并长期有效。如果您停止使用本软件，则视为自动放弃使用本软件的权利。
+
+请您在使用本软件前仔细阅读并理解本使用规约，并确保您已同意其中的条款。感谢您的理解和支持！
+                  </textarea>
+
+                </div>
+            </div>
+                </div>
+
+            <div class="row">
+                <div class="d-flex justify-content-center py-5">
+                <button type="button" class="btn btn-outline-primary btn-lg col-6" onclick="pagechange(1)">同意并部署</button>
+                </div>
+            </div>
+
+        </div>
+
+
+        <div class="row py-5" id="page2" style="display:none;">
+            <div class="row d-flex justify-content-center">
+             <div class="col-10">
+                <h2>初始化 LoginToRedirect 系统</h2>
+                <p>请填写系统的基础信息与初始用户。</p>
+             </div></div>
+
+            <div class="row d-flex justify-content-center" id="setup">
+                <div class="col-10">
+                  <div class="card my-5 p-0">
+                <div class="card-header">
+                <h3 class="card-title">高级设置</h3>
+                </div>
+                <div class="card-body m-2 py-3">
+                    <form id="all_settings">
+                        <div class="mb-3">
+                            <label for="title" class="form-label">系统名称</label>
+                            <input type="text" class="form-control" id="title"  name="title" placeholder="例：logintoredirect system">
+                            <div class="form-text">* 必填。你需要跳转系统的真实名称，系统名称将显示在网页的标题处。</div>
+                            </div>
+                        <div class="mb-3">
+                            <label for="title" class="form-label">系统真实 URL</label>
+                            <input type="text" class="form-control" id="dest_url" name="dest_url" placeholder="例：https://127.0.0.1:9203/">
+                            <div class="form-text">* 必填 你需要跳转系统的真实 URL，登录成功后将会跳转到该 URL，一定要带 http(s)://。</div>
+                            </div>
+
+
+                        <div class="row g-2">
+                        <div class="col-md">
+                        <div class="form-floating">
+                        <input type="text" class="form-control" id="set_login_failure_time" name="set_login_failure_time" placeholder="5" value="5">
+                        <label for="set_login_failure_time">登录次数限制</label>
+                            <div class="form-text">* 必填。单位次数，连续登录错误多少次将锁定账号。</div>
+                        </div>
+                        </div>
+                        <div class="col-md">
+                        <div class="form-floating">
+                        <input type="text" class="form-control" id="set_login_lock_time" name="set_login_lock_time" value="5">
+                        <label for="set_login_lock_time">锁定时长</label>
+                            <div class="form-text">* 必填。单位分钟，因登录错误导致锁定账号的时长。</div>
+                        </div>
+                        </div>
+                        <div class="col-md">
+                    <div class="form-floating">
+                    <input type="text" class="form-control" id="session_long"  name="session_long" value="5">
+                    <label for="session_long">Session 过期时间</label>
+                        <div class="form-text">*必填。单位分钟，如果长时间未有活动将自动登出。</div>
+                    </div>
+                    </div>
+                    <div class="col-md">
+                    <div class="form-floating">
+                    <input type="text" class="form-control" value="90" disabled>
+                    <label for="password_expired">密码有效期</label>
+                        <div class="form-text">天，超过指定时长将要求重置新密码。</div>
+                    </div>
+                    </div>
+                        </div>
+
+                    </form>
+        </div>
+
+
+            </div>
+
+                     <div class="row" >
+                         <div class="col-12">
+            <div class="card card-body my-2">
+                <form id="adduser">
+                    <p>设定管理员用户</p>
+                    <div class="row g-2">
+                        <div class="col-md">
+                        <div class="form-floating">
+                        <input type="text" class="form-control" id="add_username" name="username" placeholder="username">
+                        <label for="add_username">用户名</label>
+                            <div class="form-text">建议输入非标准的用户名。</div>
+                        </div>
+                        </div>
+                        <div class="col-md">
+                        <div class="form-floating">
+                        <input type="password" class="form-control" id="add_password" name="password">
+                        <label for="add_password">密码</label>
+                            <div class="form-text">密码必须含大写、小写、特殊符号与数字，且密码不少于 8 位字符</div>
+                        </div>
+                        </div>
+                        <div class="col-md">
+                            <div class="form-floating">
+                            <input type="password" class="form-control" id="password_again" >
+                            <label for="session_long">再次确认密码</label>
+                            </div>
+                    </div>
+
+
+                        </div>
+                </form>
+            </div>
+
+
+            </div>
+
+                     </div>
+            </div>
+            </div>
+
+             <div class="row">
+                <div class="d-flex justify-content-center py-5">
+                <button type="button" class="btn btn-outline-primary btn-lg col-6" onclick="pagechange(2)">完成并下一步</button>
+                </div>
+            </div>
+
+        </div>
+<!--        //setup end-->
+
+
+        <div class="row py-5" id="page3" style="display:none;height:100vh;">
+            <div class="row d-flex justify-content-center">
+             <div class="col-10">
+                <h2>即将进入 LoginToRedirect 系统</h2>
+                <p>稍安勿躁，就差最后一步了！</p>
+             </div></div>
+
+
+                <div class="d-flex row text-center justify-content-center" id="setup-area">
+
+
+                <p class="text-muted col-12 lead my-2">正在初始化数据库中...</p>
+                <p class="text-muted col-12 lead my-2" style="display:none;">正在添加用户...</p>
+                <p class="text-muted col-12 lead my-2" style="display:none;">已完成！</p>
+
+
+                    <a class="col-2" href="/" style="display:none;">进入系统</a>
+                </div>
+
+
+
+        </div>
+
+
+        </div>
+    </div>
+
+</body>
+</html>

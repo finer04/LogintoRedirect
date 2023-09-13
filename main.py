@@ -95,12 +95,20 @@ class Settings(db.Model):
 # 首页，登录界面
 @app.route('/')
 def index():
+    try:
+        settings = Settings.query.filter_by(id=1).first()
+        title = settings.title
+        return render_template('index.html', title=title)
+    except AttributeError:
+        return redirect('/setup-ui')
+
+@app.route('/setup-ui')
+def setup_ui():
     #读取系统信息
-
-    settings = Settings.query.filter_by(id=1).first()
-    title = settings.title
-    return render_template('index.html', title=title)
-
+    if Settings.query.count() == 0:
+        return render_template('setup.html')
+    else:
+        return '系统已部署'
 
 # 登录成功跳转正式平台
 @app.route('/dest')
@@ -180,20 +188,17 @@ def setup():
     if request.method == 'POST':
         if Settings.query.count() == 0:
             result = request.form
-            # 判断所有字段是否为空
-            if utils.check_dict_fields(result):
-                r = result
-                user_record = User(username=r.get('username'), password=r.get('password'), OTP_id=r.get('OTP_id'),character='main-admin')
-                setting_record = Settings(title=r.get('title'), white_IP_list=r.get('white_IP_list'),
-                                          session_long=r.get('session_long'),
-                                          set_login_failure_time=r.get('set_login_failure_time'),
-                                          set_login_lock_time=r.get('set_login_lock_time'), dest_url=r.get('dest_url'))
-                db.session.add(setting_record)
-                db.session.add(user_record)
-                db.session.commit()
-                return "success"
-            else:
-                return "form-key have null"
+            print(result)
+            r = result
+            user_record = User(username=r.get('username'), password=r.get('password'), OTP_id='',otp_enable=False,character='main-admin')
+            setting_record = Settings(title=r.get('title'),
+                                      session_long=r.get('session_long'),white_IP_list='',
+                                      set_login_failure_time=r.get('set_login_failure_time'),
+                                      set_login_lock_time=r.get('set_login_lock_time'), dest_url=r.get('dest_url'))
+            db.session.add(setting_record)
+            db.session.add(user_record)
+            db.session.commit()
+            return "success"
         else:
             return "have installed"
 
@@ -448,11 +453,13 @@ def user_logout():
 
 
 with app.app_context():
+    try:
     # 设置默认保活时间
-    session_long = float(Settings.query.filter_by(id=1).first().session_long) * 60
-    app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(seconds=int(session_long))
-    print(f"保活时长为 {app.config['PERMANENT_SESSION_LIFETIME']}")
-    # 获取终端 IP
+        session_long = float(Settings.query.filter_by(id=1).first().session_long) * 60
+        app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(seconds=int(session_long))
+        print(f"保活时长为 {app.config['PERMANENT_SESSION_LIFETIME']}")
+    except AttributeError:
+        pass
 
 if __name__ == "__main__":
     app.debug = True
