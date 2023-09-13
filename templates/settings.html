@@ -73,8 +73,8 @@
                 <div class="card-header">
                 <h3 class="card-title">用户管理</h3>
                 </div>
-                <div class="card-body m-2 py-3">
-             <table class="table table-borderless bg-white table-responsive card-table text-nowrap fs-6 lead " id="userlist">
+                <div class="card-body m-2 py-1">
+             <table class="table table-borderless bg-white table-responsive card-table text-nowrap  " id="userlist">
               <thead>
                 <tr>
                     <th scope="col">ID</th>
@@ -97,10 +97,59 @@
         </div>
 
         <div class="card-footer border-0 text-muted text-end">
-             <a href="#" class=" btn btn-primary ">新增用户</a>
+             <button class=" btn btn-primary" data-bs-toggle="collapse" href="#adduser" aria-expanded="false" aria-controls="adduser">新增用户</button>
         </div>
 
             </div>
+
+<!--   添加用户隐藏     -->
+        <div class="collapse" id="adduser">
+            <div class="card card-body my-2">
+                <form>
+                    <p>添加用户</p>
+                    <div class="row g-2">
+                        <div class="col-md">
+                        <div class="form-floating">
+                        <input type="text" class="form-control" id="add_username" placeholder="username">
+                        <label for="add_username">用户名</label>
+                            <div class="form-text">建议输入非标准的用户名。</div>
+                        </div>
+                        </div>
+                        <div class="col-md">
+                        <div class="form-floating">
+                        <input type="password" class="form-control" id="add_password">
+                        <label for="add_password">密码</label>
+                            <div class="form-text">密码必须含大写、小写、特殊符号与数字，且密码不少于 8 位字符</div>
+                        </div>
+                        </div>
+                        <div class="col-md">
+                    <div class="form-floating">
+                    <input type="password" class="form-control" id="password_again" >
+                    <label for="session_long">再次确认密码</label>
+                    </div>
+                    </div>
+                        <div class="col-md">
+                    <div class="form-floating">
+                    <select class="form-select" id="add_character" aria-label="">
+                      <option value="main-admin">系统管理员</option>
+                      <option value="security">安全管理员</option>
+                      <option value="audit">审计管理员</option>
+                      <option value="user">普通用户</option>
+                    </select>
+                    <label for="character">角色</label>
+                    </div>
+                    </div>
+
+                        </div>
+                </form>
+            </div>
+
+                <div class="card-footer border-0 text-muted text-end">
+             <a href="#" class=" btn btn-primary" onclick="add_user();">添加</a>
+        </div>
+
+            </div>
+
 
 
           <div class="card my-5 p-0">

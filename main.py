@@ -96,6 +96,7 @@ class Settings(db.Model):
 @app.route('/')
 def index():
     #读取系统信息
+
     settings = Settings.query.filter_by(id=1).first()
     title = settings.title
     return render_template('index.html', title=title)
@@ -237,13 +238,17 @@ def modify_settings():
 def modify_user():
     if request.method == 'POST':
         form = request.form.to_dict()
-        if session['character'] != 'user':
-            user = User(username=form['username'],password=form['password'],otp_enable=utils.strtobool(form['otp_enable']), OTP_id=form['OTP-id'],failure_last_time=now,character=form['character'])
-            db.session.add(user)
-            db.session.commit()
-            return 'success'
+        user = User.query.filter_by(username=form['username'])
+        if user.count() == 0 :
+            if utils.check_password_complexity(form['password']):
+                user = User(username=form['username'],password=form['password'],otp_enable=utils.strtobool(form['otp_enable']), OTP_id=form['OTP-id'],failure_last_time=now,character=form['character'])
+                db.session.add(user)
+                db.session.commit()
+                return 'success'
+            else:
+                return '密码不满足复杂度要求，请修改'
         else:
-            return "you aren't admin"
+            return "用户名已存在"
 
 # 用户修改密码
 @app.route('/user/modify/password', methods=["PUT"])
@@ -272,9 +277,14 @@ def modify_user_stat():
     if request.method == 'PUT':
         form = request.form.to_dict()
         user = User.query.filter_by(username=form['username']).first()
-        user.user_enable = utils.strtobool(form['enable'])
+        if (user.user_enable):
+            user.user_enable = False
+            result = '账号已锁定'
+        else:
+            user.user_enable = True
+            result = '账号已解锁'
         db.session.commit()
-        return 'success'
+        return result
 
 # 删除用户
 @app.route('/user/delete/<string:username>', methods=["DELETE"])
@@ -291,38 +301,24 @@ def delete_user(username):
             return '不能删除初始用户'
 
 
-# 开启安全令
-@app.route('/user/enable-OTP', methods=["POST"])
+# 开启/关闭安全令
+@app.route('/user/OTP/change', methods=["PUT"])
 @login_required
 @foridden_normal_user
-def enable_user_otp():
-    if request.method == 'POST':
+def change_otp():
+    if request.method == 'PUT':
         form = request.form.to_dict()
         user = User.query.filter_by(username=form['username']).first()
-        if form['password'] == user.password: # 验证旧密码是否跟原来的密码一样，否则没法开启安全令
-            user.OTP_id = form['OTP-id']
-            user.otp_enable = True
-            db.session.commit()
-            return 'success'
-        else:
-            return '密码有误'
-
-# 开启安全令
-@app.route('/user/disable-OTP', methods=["POST"])
-@login_required
-@foridden_normal_user
-def disable_user_otp():
-    if request.method == 'POST':
-        form = request.form.to_dict()
-        user = User.query.filter_by(username=form['username']).first()
-        if form['password'] == user.password: # 验证旧密码是否跟原来的密码一样，否则没法开启安全令
+        if user.otp_enable:
             user.OTP_id = ''
             user.otp_enable = False
-            db.session.commit()
-            return 'success'
+            result = '动态口令已关闭'
         else:
-            return '密码有误'
-
+            user.otp_enable = True
+            user.OTP_id = utils.OTP().generate()
+            result = '动态口令已开启'
+        db.session.commit()
+        return result
 
 # 安全令
 # 生成
@@ -358,6 +354,7 @@ def otp_verify(now_code=None):
 @app.route("/code")
 def run_code():
     # 生成验证码，image为验证码图片，code为验证码文本
+
     image, code = v.validate_picture()
 
     # 将验证码图片以二进制形式写入在内存中，防止将图片都放在文件夹中，占用大量磁盘

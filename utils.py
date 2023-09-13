@@ -1,6 +1,7 @@
 # 功能
 import collections
 import pyotp
+import re
 
 
 class OTP:
@@ -21,6 +22,16 @@ class OTP:
     def create_uri(self):
         uri = pyotp.totp.TOTP(self.sec).provisioning_uri('login_dengbao')
         return uri
+
+# 密码复杂度检查
+def check_password_complexity(password):
+    # 使用正则表达式进行匹配
+    pattern = r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%#*?&])[A-Za-z\d@$!#%*?&]{8,}$'
+    if re.match(pattern, password):
+        return True
+    else:
+        return False
+
 
 # 角色名转换
 def charCN(name):

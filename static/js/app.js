@@ -3,6 +3,9 @@ var url = window.location.pathname;
 $(function(){
 
 
+ $('#captcha').on('click focus', function() {
+        $('#valid-img')[0].src ='/code?'+Math.random(); // 更新图片的 src 属性
+      });
 
     //访问首页自动登出
     if (url == '/') {
@@ -14,8 +17,8 @@ $(function(){
 		setTimeout(function() {
 		var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
         var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
-
         return new bootstrap.Popover(popoverTriggerEl)
+
         })
         }, 1000);
 
@@ -23,6 +26,8 @@ $(function(){
 	}
 
     //访问首页自动登出
+    var wait = Math.floor(Math.random() * (3000 - 500 + 1)) + 500;
+
     if (url == '/dest') {
    var iframe = document.createElement("iframe");
     //等待iframe 加载
@@ -33,7 +38,7 @@ $(function(){
                  $('#loading').removeClass('animate__fadeInDown');
                  $('#loading').addClass('animate__fadeOutDown');
                  $('iframe').addClass('animate__animated animate__fadeIn');
-           	}, 2500);
+           	}, wait);
 
 
         });
@@ -43,7 +48,7 @@ $(function(){
                  $('#loading').removeClass('animate__fadeInDown');
                  $('#loading').addClass('animate__fadeOutDown');
                  $('iframe').addClass('animate__animated animate__fadeIn');
-           	}, 2500);
+           	}, wait);
 
         };
         }
@@ -54,7 +59,7 @@ $(function(){
 if (url == '/return') {
     setTimeout(function() {
        window.location.replace("/");
-     }, 4500);
+     }, 2500);
 }
 
 
@@ -180,6 +185,58 @@ function login() {
          });
 }
 
+// 新增用户
+function add_user(){
+    var s = $('#adduser');
+    var info = {
+        'username': s.find("#add_username").val(),
+        'password' : s.find("#add_password").val(),
+        'character' : s.find("#add_character").val(),
+        'otp_enable' : '0',
+        'OTP-id' : ''
+    };
+
+     var formValid = true;
+        s.find("input").each(function() {
+          if ($(this).val() === "") {
+            alert("请填写所有必填字段！");
+            formValid = false;
+            return false; // 停止遍历
+          }
+        });
+        if (!formValid) {
+          event.preventDefault(); // 阻止表单提交
+        } else if (formValid) {
+            $.ajax({
+                //提交数据的类型 POST GET
+                type:"POST",
+                //提交的网址
+                url: "/user/add",
+                //提交的数据
+                data: info,
+                datatype: "text",
+                //成功返回之后调用的函数
+                success:function(data){
+                    if (data.includes("success")) {
+                        alert('添加成功！')
+                        window.location.replace("/settings");
+                    }
+                    else {
+                        alert(data)
+                    }
+
+                } ,
+                //调用出错执行的函数
+                error: function(){
+                    alert("网络错误");
+
+                }
+             });
+
+         }
+
+}
+
 
 // 设置提交
 function setting_submit(){
@@ -242,21 +299,29 @@ function user_list_all() {
 
 function create_link(str) {
     var base64_img = jrQrcode.getQrBase64('otpauth://totp/login_dengbao?secret='+str);
-    var over = '<a href="#" class="qrcode-href" data-bs-container="body" data-bs-toggle="popover" data-bs-placement="right" data-bs-html="true" data-bs-content="<div id=\'qrcode\'><p>请用谷歌验证器或T盾其他令牌器扫描</p><img src='+base64_img+'></div>">'+str+'</a>'
+    var over = '<a href="#" class="qrcode-href text-muted " data-bs-container="body" data-bs-toggle="popover" data-bs-placement="right" data-bs-html="true" data-bs-content="<div id=\'qrcode\'><p>请用谷歌验证器或T盾其他令牌器扫描</p><img src='+base64_img+'></div>">'+str+'</a>'
     return over
 }
 
-function addhtml(username){
+function iconbeauty(str){
+        if (str == '开启') {
+            var code = `<h3 class="badge bg-success">${str} ✅</h3>`;
+        } else {
+            var code = `<span class="badge bg-secondary">${str} ❌</span>`
+        }
+        return code
+}
 
+function addhtml(username){
     return  ` <div class="dropdown">
         <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
         操作
         </button>
         <ul class="dropdown-menu" aria-labelledby="dropdownMenu">
-        <li><a class="dropdown-item" href="#" onclick="change_password('${username}')">修改密码</a></li>
-        <li><a class="dropdown-item" href="#" onclick="lock_unlock('${username}')">锁定/解锁账号</a></li>
-        <li><a class="dropdown-item" href="#" onclick="change_OTP('${username}')">开启/关闭动态口令</a></li>
-        <li><a class="dropdown-item" href="#" onclick="delete_user('${username}');">删除该用户</a></li>
+        <li><a class="dropdown-item" href="#" onclick="userops('${username}',')">修改密码</a></li>
+        <li><a class="dropdown-item" href="#" onclick="userops('${username}','l')">锁定/解锁账号</a></li>
+        <li><a class="dropdown-item" href="#" onclick="userops('${username}','o')">开启/关闭动态口令</a></li>
+        <li><a class="dropdown-item" href="#" onclick="userops('${username}','d');">删除该用户</a></li>
         </ul>
         </div>
 `
@@ -270,15 +335,97 @@ function addhtml(username){
           newRow.append($("<td>").text(result.id));
           newRow.append($("<td>").text(result.username));
           newRow.append($("<td>").text(result.character));
-          newRow.append($("<td>").text(result.otp_enable));
+          newRow.append($("<td>").html(iconbeauty(result.otp_enable)));
           newRow.append($("<td>").html(create_link(result.OTP_id)));
-          newRow.append($("<td>").text(result.user_enable));
+          newRow.append($("<td>").html(iconbeauty(result.user_enable)));
           newRow.append($("<td>").html(addhtml(result.username)));
           tableBody.append(newRow);
         });
       });
 
-
-
 }
 
+function userops(name,way) {
+    const u = new User_Ops(name);
+    switch(way){
+        case "d":
+            u.delete_user();
+            break;
+        case "l":
+            u.lock_or_unlock();
+            break;
+        case "o":
+            u.OTP();
+            break;
+    }
+}
+
+// 用户按钮组类
+class User_Ops {
+    constructor(username) {
+        this.name = username;
+    }
+
+    delete_user() {
+        var confirm_delete = window.confirm("真的要删除用户 "+this.name+" 吗？");
+        if (confirm_delete){
+            $.ajax({
+              url: "/user/delete/" + this.name,
+              type: "DELETE",
+              datatype: "text",
+              success: function(data) {
+                if (data.includes("success")) {
+                    alert("删除成功");
+                    location.reload();
+                }
+                else {
+                    alert(data)
+                }
+
+              },
+              error: function(xhr, status, error) {
+                console.log("删除失败: " + error);
+              }
+            });
+    }}
+
+
+    lock_or_unlock() {
+        var confirm_delete = window.confirm("真的要锁定或解锁 "+this.name+" 吗？");
+        if (confirm_delete){
+            $.ajax({
+              url: "/user/modify/stat",
+              type: "PUT",
+              data: {'username': this.name},
+              datatype: "text",
+              success: function(data) {
+                    alert(data);
+                    location.reload();
+              },
+              error: function(xhr, status, error) {
+                console.log("操作失败: " + error);
+              }
+            });
+    }
+    }
+
+    OTP(){
+        var confirm_delete = window.confirm("是否开启或关闭 "+this.name+" 的动态口令？");
+        if (confirm_delete){
+            $.ajax({
+              url: "/user/OTP/change",
+              type: "PUT",
+              data: {'username': this.name},
+              datatype: "text",
+              success: function(data) {
+                    alert(data);
+                    location.reload();
+              },
+              error: function(xhr, status, error) {
+                console.log("操作失败: " + error);
+              }
+            });
+    }
+    }
+
+}
