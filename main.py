@@ -502,11 +502,10 @@ with app.app_context():
         pass
 
 if __name__ == "__main__":
-    app.debug = True
     handler = logging.FileHandler('log//flask.log', encoding='UTF-8')
     handler.setLevel(logging.DEBUG)  # 设置日志记录最低级别为DEBUG，低于DEBUG级别的日志记录会被忽略，不设置setLevel()则默认为NOTSET级别。
     logging_format = logging.Formatter(
         '%(asctime)s - %(levelname)s - %(filename)s - %(funcName)s - %(lineno)s - %(message)s')
     handler.setFormatter(logging_format)
     app.logger.addHandler(handler)
-    app.run()
+    app.run(host='0.0.0.0',port=5000)
