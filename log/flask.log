@@ -1,0 +1,20 @@
+2023-09-14 12:33:38,775 - INFO - main.py - logwrite - 55 - 127.0.0.1 -  finer04 已登录系统
+2023-09-14 12:33:52,012 - INFO - main.py - logwrite - 55 - 127.0.0.1 -  finer04 查看了设置页面 。
+2023-09-14 12:34:51,918 - INFO - main.py - logwrite - 55 - 127.0.0.1 -  finer04 新增了 secadmin 用户 。
+2023-09-14 12:34:53,078 - INFO - main.py - logwrite - 55 - 127.0.0.1 -  finer04 查看了设置页面 。
+2023-09-14 12:35:17,346 - INFO - main.py - logwrite - 55 - 127.0.0.1 -  finer04 开启了动态口令。
+2023-09-14 12:35:18,279 - INFO - main.py - logwrite - 55 - 127.0.0.1 -  finer04 查看了设置页面 。
+2023-09-14 12:35:44,316 - INFO - main.py - logwrite - 55 - 127.0.0.1 -  finer04 关闭了动态口令。
+2023-09-14 12:36:00,350 - INFO - main.py - logwrite - 55 - 127.0.0.1 -  finer04 对 secadmin 进行锁定账号的操作 。
+2023-09-14 12:36:08,968 - INFO - main.py - logwrite - 55 - 127.0.0.1 -  finer04 对 secadmin 进行解锁账号的操作 。
+2023-09-14 12:36:27,077 - INFO - main.py - logwrite - 55 - 127.0.0.1 -  finer04 修改了系统参数，其中修改了 ['white_IP_list'] 这些参数 。
+2023-09-14 12:36:35,221 - INFO - main.py - logwrite - 55 - 127.0.0.1 -  finer04 修改了系统参数，其中修改了 ['white_IP_list'] 这些参数 。
+2023-09-14 12:42:49,355 - INFO - main.py - logwrite - 55 - 127.0.0.1 -  finer04 已登录系统
+2023-09-14 12:50:30,107 - INFO - main.py - logwrite - 55 - 127.0.0.1 -  finer04 已登录系统
+2023-09-14 12:55:44,926 - INFO - main.py - logwrite - 55 - 127.0.0.1 -  finer04 输错密码了
+2023-09-14 12:55:53,080 - INFO - main.py - logwrite - 55 - 127.0.0.1 -  finer04 已登录系统
+2023-09-14 13:02:15,026 - INFO - main.py - logwrite - 55 - 127.0.0.1 -  finer04 已登录系统
+2023-09-14 13:16:12,632 - INFO - main.py - logwrite - 55 - 127.0.0.1 -  finer04 对 secadmin 进行锁定账号的操作 。
+2023-09-14 13:16:18,513 - INFO - main.py - logwrite - 55 - 127.0.0.1 -  finer04 对 secadmin 进行解锁账号的操作 。
+2023-09-14 13:19:19,691 - INFO - main.py - logwrite - 55 - 127.0.0.1 -  finer04 手动登出系统了
+2023-09-14 13:19:30,545 - INFO - main.py - logwrite - 55 - 127.0.0.1 -  finer04 已登录系统
