@@ -250,6 +250,7 @@ function setting_submit(){
         'set_login_failure_time' : s.find("#set_login_failure_time").val(),
         'set_login_lock_time' : s.find("#set_login_lock_time").val(),
         'session_long' : s.find("#session_long").val(),
+        'url_mode' : s.find("#url_mode").val(),
         'id' : '1'
     };
 

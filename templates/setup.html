@@ -81,9 +81,20 @@
                             <div class="form-text">* 必填。你需要跳转系统的真实名称，系统名称将显示在网页的标题处。</div>
                             </div>
                         <div class="mb-3">
+                            <div class="row">
+                            <div class="col-8">
                             <label for="title" class="form-label">系统真实 URL</label>
-                            <input type="text" class="form-control" id="dest_url" name="dest_url" placeholder="例：https://127.0.0.1:9203/">
-                            <div class="form-text">* 必填 你需要跳转系统的真实 URL，登录成功后将会跳转到该 URL，一定要带 http(s)://。</div>
+                            <input type="text" class="form-control" id="dest_url" value="{{data.url}}">
+                            <div class="form-text">你需要跳转系统的真实 URL，登录成功后将会跳转到该 URL。如果使用反向代理模式，URL最后一定要带 "/"。</div>
+                             </div>
+                            <div class="col-4">
+                                <label for="title" class="form-label">访问模式</label>
+                                <select class="form-select shadow-sm" id="url_mode" name="url_mode" aria-label="" >
+                                  <option value="iframe" selected>正向访问模式</option>
+                                  <option value="proxy">反向代理模式</option>
+                                </select>
+                                <div class="form-text">正向访问：适合可公网访问的平台，浏览器直接访问目标URL；<br>反向代理：适合仅内网访问的平台，系统将中转目标的所有数据。</div>
+                            </div></div>
                             </div>
 
 
@@ -141,7 +152,7 @@
                         <div class="form-floating">
                         <input type="password" class="form-control" id="add_password" name="password">
                         <label for="add_password">密码</label>
-                            <div class="form-text">密码必须含大写、小写、特殊符号与数字，且密码不少于 8 位字符</div>
+                            <div class="form-text">初次安装没有密码限制。</div>
                         </div>
                         </div>
                         <div class="col-md">

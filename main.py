@@ -1,6 +1,8 @@
 import time
 
-from flask import Flask, request, render_template, g, session,make_response,redirect
+from flask import Flask, request, render_template, g, session,make_response,redirect, send_file,stream_with_context,Response
+import requests
+from werkzeug.middleware.proxy_fix import ProxyFix
 import verify_code as v
 import functools
 from io import BytesIO
@@ -10,6 +12,8 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timedelta
 import utils
 import logging
+from threading import Thread
+
 
 
 # 全局
@@ -89,6 +93,7 @@ class Settings(db.Model):
     set_login_failure_time = db.Column(db.String(3))  # 登录失败次数限制
     set_login_lock_time = db.Column(db.String(3))  # 登录失败次数锁定时间
     dest_url = db.Column(db.String(100))  # 最终登录系统的地址
+    url_mode = db.Column(db.String(10))  # 最终登录系统的地址
 
 ##################################################
 ##
@@ -107,7 +112,8 @@ def user_info():
         'white_ip' : settings.white_IP_list,
         'character' : session.get('character'),
         'CNcharacter' : utils.charCN(session.get('character')),
-        'username':  session.get('username')
+        'username':  session.get('username'),
+        'url_mode': settings.url_mode
     }
     return data
 
@@ -148,6 +154,12 @@ def setting_page():
     data = user_info()
     return render_template('settings.html', data=data)
 
+# 输出目标地址，给代理接口拿数据
+@app.route('/settings/dest_url')
+def get_proxy_url():
+    data = user_info()
+    return data['url']
+
 # 查看系统日志
 @app.route('/logs')
 @login_required
@@ -160,9 +172,15 @@ def logs_page():
 @app.route('/dest/url')
 @login_required
 def url_redirect():
+    public_IP = request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
     settings = Settings.query.filter_by(id=1).first()
     url = settings.dest_url
-    return redirect(url)
+    mode = settings.url_mode
+    print(public_IP)
+    if mode == 'proxy':
+        return redirect(f'http://{public_IP}:5001/')
+    elif mode == 'iframe':
+        return redirect(url)
 
 # 过期session跳转
 @app.route('/return')
@@ -208,7 +226,7 @@ def setup():
             print(result)
             r = result
             user_record = User(username=r.get('username'), password=r.get('password'), OTP_id='',otp_enable=False,character='main-admin')
-            setting_record = Settings(title=r.get('title'),
+            setting_record = Settings(title=r.get('title'),url_mode=r.get('url_mode'),
                                       session_long=r.get('session_long'),white_IP_list='',
                                       set_login_failure_time=r.get('set_login_failure_time'),
                                       set_login_lock_time=r.get('set_login_lock_time'), dest_url=r.get('dest_url'))
@@ -492,6 +510,7 @@ def user_logout():
     return 'logout'
 
 
+
 with app.app_context():
     try:
     # 设置默认保活时间
@@ -508,4 +527,5 @@ if __name__ == "__main__":
         '%(asctime)s - %(levelname)s - %(filename)s - %(funcName)s - %(lineno)s - %(message)s')
     handler.setFormatter(logging_format)
     app.logger.addHandler(handler)
-    app.run(host='0.0.0.0',port=5000)
+    app.run(host='0.0.0.0',port=5000,threaded=True,debug=True)
+
