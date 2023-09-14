@@ -1,11 +1,11 @@
 import time
 
-from flask import Flask, request, render_template, g, jsonify, session,make_response,redirect,url_for
+from flask import Flask, request, render_template, g, session,make_response,redirect
 import verify_code as v
 import functools
 from io import BytesIO
 import base64
-import os, sys, pyotp, json
+import os, sys, json
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timedelta
 import utils
@@ -49,6 +49,11 @@ def foridden_normal_user(func):
             return func(*args, **kwargs)
     return inner
 
+# 日志写入
+def logwrite(str):
+    ip = request.remote_addr
+    app.logger.info(f'{ip} -  {str}')
+
 # 初始化数据库
 WIN = sys.platform.startswith('win')
 if WIN:  # 如果是 Windows 系统，使用三个斜线
@@ -91,6 +96,20 @@ class Settings(db.Model):
 ##
 ##################################################
 
+# 前端必要参数查询
+def user_info():
+    settings = Settings.query.filter_by(id=1).first()
+    data = {'title': settings.title,
+        'url': settings.dest_url,
+        'session_long' : settings.session_long,
+        'login_f' : settings.set_login_failure_time,
+        'login_l' : settings.set_login_lock_time,
+        'white_ip' : settings.white_IP_list,
+        'character' : session.get('character'),
+        'CNcharacter' : utils.charCN(session.get('character')),
+        'username':  session.get('username')
+    }
+    return data
 
 # 首页，登录界面
 @app.route('/')
@@ -102,6 +121,7 @@ def index():
     except AttributeError:
         return redirect('/setup-ui')
 
+# 安装界面
 @app.route('/setup-ui')
 def setup_ui():
     #读取系统信息
@@ -115,10 +135,9 @@ def setup_ui():
 @login_required
 def main_page():
     # 读取系统信息
-    settings = Settings.query.filter_by(id=1).first()
-    title = settings.title
-    url = settings.dest_url
-    return render_template('dest.html', title=title,username = session.get('username'),character=session.get('character'),CNcharacter=utils.charCN(session.get('character')))
+    data = user_info()
+    # title=title,username = session.get('username'),character=session.get('character'),CNcharacter=utils.charCN(session.get('character'))
+    return render_template('dest.html',data=data)
 
 # 登录成功跳转正式平台
 @app.route('/settings')
@@ -126,18 +145,16 @@ def main_page():
 @foridden_normal_user
 def setting_page():
     # 读取系统信息
-    settings = Settings.query.filter_by(id=1).first()
-    data = {'title': settings.title,
-        'url': settings.dest_url,
-        'session_long' : settings.session_long,
-        'login_f' : settings.set_login_failure_time,
-        'login_l' : settings.set_login_lock_time,
-        'white_ip' : settings.white_IP_list,
-        'character' : session.get('character'),
-        'CNcharacter' : utils.charCN(session.get('character')),
-        'username':  session.get('username')
-    }
+    data = user_info()
     return render_template('settings.html', data=data)
+
+# 查看系统日志
+@app.route('/logs')
+@login_required
+@foridden_normal_user
+def logs_page():
+    txt = utils.logs_line()
+    return render_template('logs.html',data = user_info(),txt=txt)
 
 # 真实url跳转
 @app.route('/dest/url')
@@ -228,6 +245,7 @@ def modify_settings():
                     # settings_record.field = new_setting_dict[field]
                     setattr(settings_record, field, new_setting_dict[field])  # 不可以向上面直接写.field，要用setattr替换对象属性
                 db.session.commit()
+                logwrite(f'{session["username"]} 修改了系统参数，其中修改了 {diff} 这些参数 。')
                 return 'have changed'
             else:
                 return 'no changed'
@@ -249,6 +267,7 @@ def modify_user():
                 user = User(username=form['username'],password=form['password'],otp_enable=utils.strtobool(form['otp_enable']), OTP_id=form['OTP-id'],failure_last_time=now,character=form['character'])
                 db.session.add(user)
                 db.session.commit()
+                logwrite(f'{session["username"]} 新增了 {form["username"]} 用户 。')
                 return 'success'
             else:
                 return '密码不满足复杂度要求，请修改'
@@ -268,6 +287,7 @@ def modify_user_password():
                 if utils.check_password_complexity(form['new_password']):
                     user.password = form['new_password']
                     db.session.commit()
+                    logwrite(f'{session["username"]} 对 {user.username} 进行修改的操作 。')
                     return '已修改成功！'
                 else:
                     return '密码不符合密码复杂度'
@@ -288,9 +308,11 @@ def modify_user_stat():
         if (user.user_enable):
             user.user_enable = False
             result = '账号已锁定'
+            logwrite(f'{session["username"]} 对 {user.username} 进行锁定账号的操作 。')
         else:
             user.user_enable = True
             result = '账号已解锁'
+            logwrite(f'{session["username"]} 对 {user.username} 进行解锁账号的操作 。')
         db.session.commit()
         return result
 
@@ -301,12 +323,16 @@ def modify_user_stat():
 def delete_user(username):
     if request.method == 'DELETE':
         user = User.query.filter_by(username=username).first()
-        if user.id != 1:
-            db.session.delete(user)
-            db.session.commit()
-            return 'success'
+        if user.username == session["username"]:
+            if user.id != 1:
+                db.session.delete(user)
+                db.session.commit()
+                logwrite(f'{session["username"]} 删除了 {user.username} 。')
+                return 'success'
+            else:
+                return '不能删除初始用户'
         else:
-            return '不能删除初始用户'
+            return '不能自己删自己'
 
 
 # 开启/关闭安全令
@@ -321,10 +347,12 @@ def change_otp():
             user.OTP_id = ''
             user.otp_enable = False
             result = '动态口令已关闭'
+            logwrite(f'{session["username"]} 关闭了动态口令。')
         else:
             user.otp_enable = True
             user.OTP_id = utils.OTP().generate()
             result = '动态口令已开启'
+            logwrite(f'{session["username"]} 开启了动态口令。')
         db.session.commit()
         return result
 
@@ -392,7 +420,7 @@ def login():
         session['character'] = character  # 记录用户当前角色
         session['IP'] = ip
         session['username'] = username
-        app.logger.info(f'{username} 已登录系统')
+        logwrite(f'{username} 已登录系统')
 
     if request.method == 'POST':
         result = request.form.to_dict()
@@ -424,6 +452,7 @@ def login():
                                         return '登录成功，正在跳转...'
                                     else:
                                         if len(result['OTP-id']) != 0:
+                                            logwrite(f'{userinfo.username} 输错动态口令了')
                                             return '动态口令错误'
                                         else:
                                             return '该账号已开启二步认证，请填写动态口令'
@@ -440,18 +469,26 @@ def login():
                             userinfo.failure_count += 1
                             userinfo.failure_last_time = now
                             db.session.commit()
+                            logwrite(f'{userinfo.username} 输错密码了')
                             return '用户名或密码错误'
                     else:
+                        logwrite(f'{userinfo.username} 由于登录多次失败，被自动锁定了')
                         return '登录多次失败，已进入锁定期'
             else:
+                logwrite(f'{userinfo.username} 尝试登录系统，但用户已被禁用了')
                 return '用户被禁用'
         else:  # 用户名错误
+            logwrite(f'在尝试登录，但账户不存在')
             return '用户名或密码错误'
 
 # 登出
 @app.route('/logout', methods=["GET"])
 def user_logout():
-    session.clear()
+    try:
+        logwrite(f'{session["username"]} 手动登出系统了')
+        session.clear()
+    except KeyError:
+        return '无 Session'
     return 'logout'
 
 
