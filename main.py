@@ -59,7 +59,7 @@ def logwrite(str):
     app.logger.info(f'{ip} -  {str}')
 
 # 初始化数据库
-WIN = sys.platform.startswith('win')
+WIN = sys.platform.startswith('linux')
 if WIN:  # 如果是 Windows 系统，使用三个斜线
     prefix = 'sqlite:///'
 else:  # 否则使用四个斜线
@@ -172,13 +172,15 @@ def logs_page():
 @app.route('/dest/url')
 @login_required
 def url_redirect():
-    public_IP = request.environ.get('HTTP_X_REAL_IP', request.remote_addr)
+    public_url = request.url_root
     settings = Settings.query.filter_by(id=1).first()
     url = settings.dest_url
     mode = settings.url_mode
-    print(public_IP)
+    print(public_url)
     if mode == 'proxy':
-        return redirect(f'http://{public_IP}:5001/')
+        new_url = public_url.replace(":5000",":5001")
+        print(new_url)
+        return redirect(f'{new_url}')
     elif mode == 'iframe':
         return redirect(url)
 
