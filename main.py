@@ -178,9 +178,8 @@ def url_redirect():
     mode = settings.url_mode
     print(public_url)
     if mode == 'proxy':
-        new_url = public_url.replace(":5000",":5001")
-        print(new_url)
-        return redirect(f'{new_url}')
+        #占坑，以后完善代理功能
+        return redirect(url)
     elif mode == 'iframe':
         return redirect(url)
 
