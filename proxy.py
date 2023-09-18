@@ -15,7 +15,7 @@ def download_file(streamable):
 def _proxy(*args, **kwargs):
     resp = requests.request(
         method=request.method,
-        url=request.url.replace(request.host_url, PROXY_URL),
+        url=request.url.replace(request.host_url, PROXY_URL).replace('proxy',''),
         headers={key: value for (key, value) in request.headers if key != 'Host'},
         data=request.get_data(),
         cookies=request.cookies,
@@ -31,8 +31,8 @@ def _proxy(*args, **kwargs):
 
 app = Flask(__name__)
 
-@app.route('/', defaults={'path': ''})
-@app.route('/<path:path>')
+@app.route('/proxy/<path:path>', defaults={'path': ''})
+#@app.route('/proxy/<path:path>')
 def download(path):
     return _proxy()
 

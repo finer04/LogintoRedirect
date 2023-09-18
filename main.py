@@ -511,7 +511,35 @@ def user_logout():
         return '无 Session'
     return 'logout'
 
+PROXY_URL = ''
+## 反向代理功能
+def download_file(streamable):
+    with streamable as stream:
+        stream.raise_for_status()
+        for chunk in stream.iter_content(chunk_size=8192):
+            yield chunk
 
+def _proxy(*args, **kwargs):
+    resp = requests.request(
+        method=request.method,
+        url=request.url.replace(request.host_url, PROXY_URL).replace('proxy/',''),
+        headers={key: value for (key, value) in request.headers if key != 'Host'},
+        data=request.get_data(),
+        cookies=request.cookies,
+        allow_redirects=False,
+        stream=True)
+    print(resp.url)
+    excluded_headers = ['content-encoding', 'content-length', 'transfer-encoding', 'connection']
+    headers = [(name, value) for (name, value) in resp.raw.headers.items()
+               if name.lower() not in excluded_headers]
+
+    return Response(download_file(resp), resp.status_code, headers)
+
+
+@app.route('/proxy/<path:path>', defaults={'path': ''})
+#@app.route('/proxy/<path:path>')
+def download(path):
+    return _proxy()
 
 with app.app_context():
     try:
@@ -519,6 +547,7 @@ with app.app_context():
         session_long = float(Settings.query.filter_by(id=1).first().session_long) * 60
         app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(seconds=int(session_long))
         print(f"保活时长为 {app.config['PERMANENT_SESSION_LIFETIME']}")
+        PROXY_URL = Settings.query.filter_by(id=1).first().dest_url
     except AttributeError:
         pass
 

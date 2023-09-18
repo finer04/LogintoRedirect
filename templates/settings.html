@@ -172,13 +172,13 @@
                             <div class="col-8">
                             <label for="title" class="form-label">系统真实 URL</label>
                             <input type="text" class="form-control" id="dest_url" value="{{data.url}}">
-                            <div class="form-text">你需要跳转系统的真实 URL，登录成功后将会跳转到该 URL。<br>如果使用反向代理模式，URL最后一定要带 "/"。<br> 开启反向代理，源站需要允许 CORS 与 Cookie 传输。</div>
+                            <div class="form-text">你需要跳转系统的真实 URL，登录成功后将会跳转到该 URL。<br>如果使用反向代理模式，URL最后一定要带 "/"。<br> 开启反向代理，源站需要允许 CORS 与 Cookie 传输。暂不支持有跳转的页面（如kibana）</div>
                              </div>
                             <div class="col-4">
                                 <label for="title" class="form-label">访问模式</label>
                                 <select class="form-select shadow-sm" id="url_mode" name="url_mode" aria-label="" >
                                   <option value="iframe" {% if data.url_mode == 'iframe' %} selected {% endif %}>正向访问模式</option>
-                                  <option value="proxy" {% if data.url_mode == 'proxy' %} selected {% endif %}>反向代理模式</option>
+                                  <option value="proxy" {% if data.url_mode == 'proxy' %} selected {% endif %}>反向代理模式（Alpha）</option>
                                 </select>
                                 <div class="form-text">正向访问：适合可公网访问的平台，浏览器直接访问目标URL；<br>反向代理：适合仅内网访问的平台，系统将中转目标的所有数据。</div>
                             </div></div>
